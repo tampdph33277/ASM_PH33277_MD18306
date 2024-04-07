@@ -1,239 +1,396 @@
 package tampdph33277.fpoly.asm_application;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.Toast;
-
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.squareup.picasso.Picasso;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import tampdph33277.fpoly.asm_application.Adapter.Student_Adapter;
-import tampdph33277.fpoly.asm_application.DTO.Student_DTO;
-public class Danh_Sach extends AppCompatActivity {
-    private static final int PICK_IMAGE_REQUEST = 1;
-    private Uri selectedImageUri;
-    private RecyclerView recyclerView;
-    private Student_Adapter adapter;
-    private View dialogView;
 
+import tampdph33277.fpoly.asm_application.API.Response;
+import tampdph33277.fpoly.asm_application.API.HttpRequest;
+import tampdph33277.fpoly.asm_application.Adapter.CarAdapter;
+
+import tampdph33277.fpoly.asm_application.DTO.Car;
+
+public class Danh_Sach extends AppCompatActivity {
+    RecyclerView lvMain;
+    List<Car> carList;
+    CarAdapter carAdapter;
+    FloatingActionButton fab;
+    HttpRequest httpRequest;
+    com.google.android.material.textfield.TextInputEditText edSearch;
+    ImageView imgEdit;
+    File file;
+    Button btnUpdate, btnCancel;
+    EditText edtTenXe, edtGia;
+    Spinner spinnerLoai;
+    Uri imageUri;
+    Spinner spinnerSort;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_danh_sach);
-        recyclerView = findViewById(R.id.recyclerViewStudents);
-
-
-        // Set onClickListener for the button to show the dialog
-        ImageView img_cuon = findViewById(R.id.img_cuon);
-        img_cuon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showDialog();
-            }
-        });
-
-        // Load students from server
-        nodchanglist();
-    }
-
-    private void nodchanglist() {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.24.26.93:3027/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        Student_API api = retrofit.create(Student_API.class);
-        Call<List<Student_DTO>> call = api.getStudents();
-        call.enqueue(new Callback<List<Student_DTO>>() {
-            @Override
-            public void onResponse(Call<List<Student_DTO>> call, Response<List<Student_DTO>> response) {
-                if (response.isSuccessful()) {
-                    List<Student_DTO> studentList = response.body();
-                    adapter = new Student_Adapter(Danh_Sach.this, studentList);
-                    recyclerView.setAdapter(adapter);
-                    recyclerView.setLayoutManager(new LinearLayoutManager(Danh_Sach.this));
-                } else {
-                    Toast.makeText(Danh_Sach.this, "Không thể lấy dữ liệu từ máy chủ", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onFailure(Call<List<Student_DTO>> call, Throwable t) {
-                Toast.makeText(Danh_Sach.this, "Đã xảy ra lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                Log.e("Danh_Sach", "Đã xảy ra lỗi: " + t.getMessage(), t);
-            }
-        });
-    }
-
-    // Method to show dialog for adding new student
-    public void showDialog() {
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(Danh_Sach.this);
-        LayoutInflater inflater = LayoutInflater.from(Danh_Sach.this);
-         dialogView = inflater.inflate(R.layout.dialog_add_danhsach, null);
-
-        dialogBuilder.setView(dialogView);
-
-        EditText editTextName = dialogView.findViewById(R.id.editTextName_add);
-        EditText editTextStudentId = dialogView.findViewById(R.id.editTextStudentId_add);
-        EditText editTextStudentDtb = dialogView.findViewById(R.id.editTextStudentDtb_add);
-
-        ImageView img_avatar = dialogView.findViewById(R.id.img_avatar_add);
-        Button buttonChooseImage = dialogView.findViewById(R.id.buttonChooseImage_add);
-        Button buttonSave = dialogView.findViewById(R.id.buttonSave_add);
-        AlertDialog alertDialog = dialogBuilder.create();
-
-        // Set onClickListener for the button to choose image
-        buttonChooseImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                openImagePicker();
-            }
-        });
-
-
-
-        buttonSave.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Get student information from EditTexts
-                String name = editTextName.getText().toString();
-                String studentId = editTextStudentId.getText().toString();
-                String diemtb = editTextStudentDtb.getText().toString();
-                if (name.isEmpty() || studentId.isEmpty() || diemtb.isEmpty()) {
-                    Toast.makeText(Danh_Sach.this, "Vui lòng điền đầy đủ thông tin", Toast.LENGTH_SHORT).show();
-                    return; // Thoát khỏi phương thức nếu có trường thông tin trống
-                }
-                // Kiểm tra xem diemtb có phải là số hay không
-                try {
-                    double diem = Double.parseDouble(diemtb);
-
-                    // Kiểm tra xem giá trị có nằm trong khoảng từ 0 đến 10 hay không
-                    if (diem >= 0 && diem <= 10) {
-                        // Check if an image has been selected
-                        if (selectedImageUri != null) {
-                            String imagePath = getImagePath(selectedImageUri);
-                            if (imagePath != null) {
-                                // Create a new Student_DTO object
-                                Student_DTO newStudent = new Student_DTO();
-                                newStudent.setName(name);
-                                newStudent.setStudentId(studentId);
-                                newStudent.setAverageScore(Double.parseDouble(diemtb));
-                                newStudent.setAvatar(imagePath);
-
-                                // Add the new student to the database
-                                addStudentToDatabase(newStudent);
-                                alertDialog.dismiss();
-                            } else {
-                                Toast.makeText(Danh_Sach.this, "Vui lòng chọn ảnh trước khi lưu", Toast.LENGTH_SHORT).show();
+        httpRequest = new HttpRequest();
+        fab = findViewById(R.id.fab);
+        lvMain = findViewById(R.id.listviewMain);
+        carAdapter = new CarAdapter(Danh_Sach.this);
+        edSearch = findViewById(R.id.edSearch);
+        spinnerSort = findViewById(R.id.spinnerSort);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(Danh_Sach.this,
+                R.array.sap_xep_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerSort.setAdapter(adapter);
+        spinnerSort.
+                setOnItemSelectedListener(
+                        new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                String selectedOption = parent.getItemAtPosition(position).toString();
+                                sortCars(selectedOption);
                             }
-                        } else {
-                            Toast.makeText(Danh_Sach.this, "Vui lòng chọn ảnh trước khi lưu", Toast.LENGTH_SHORT).show();
-                        }
-                    } else {
-                        // Nếu giá trị không nằm trong khoảng từ 0 đến 10, hiển thị thông báo lỗi
-                        Toast.makeText(Danh_Sach.this, "Điểm trung bình phải nằm trong khoảng từ 0 đến 10", Toast.LENGTH_SHORT).show();
-                    }
-                } catch (NumberFormatException e) {
-                    // Nếu diemtb không phải là số, hiển thị thông báo lỗi
-                    Toast.makeText(Danh_Sach.this, "Vui lòng nhập số vào ô Điểm trung bình", Toast.LENGTH_SHORT).show();
-                }
+
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
+
+                            }
+                        });
+
+        carAdapter.setOnItemClickListener(new CarAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(String id) {
+                deleteCar(id);
+            }
+
+            @Override
+            public void updateItem(String id, String tenXe, int gia, String anh, String loaiXe) {
+                updateCar(id, tenXe, gia, anh, loaiXe);
             }
         });
 
-        alertDialog.show();
+        fab.setOnClickListener(v -> {
+            Intent intent = new Intent(Danh_Sach.this, AddCar.class);
+            startActivity(intent);
+        });
+        edSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionID, KeyEvent event) {
+                if (actionID == EditorInfo.IME_ACTION_SEARCH) {
+                    String key = edSearch.getText().toString().trim();
+                    if (key.isEmpty()) {
+                        onResume();
+                    } else {
+                        httpRequest.callApi().searchCar(key).enqueue(searchCars);
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+
+
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        lvMain.setLayoutManager(linearLayoutManager);
+        onResume();
     }
 
-    // Method to open image picker
-    private void openImagePicker() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_PICK);
-        startActivityForResult(Intent.createChooser(intent, "Chọn ảnh"), PICK_IMAGE_REQUEST);
-    }
-
-    // Handle the result of image picker
-    // Handle the result of image picker
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK) {
-            if (data != null) {
-                selectedImageUri = data.getData();
-                if (dialogView != null) {
-                    ImageView img_avatar = dialogView.findViewById(R.id.img_avatar_add);
-                    Picasso.get().load(selectedImageUri).into(img_avatar);
+    Callback<Response<ArrayList<Car>>> getCars = new Callback<Response<ArrayList<Car>>>() {
+        @Override
+        public void onResponse(Call<Response<ArrayList<Car>>> call, retrofit2.Response<Response<ArrayList<Car>>> response) {
+            if (response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    carList = new ArrayList<>();
+                    carList = response.body().getData();
+                    Log.d("Danh sách", "onResponse: " + carList.toString());
+                    carAdapter.setData(carList);
+                    lvMain.setAdapter(carAdapter);
+                    for (Car car : carList
+                    ) {
+                        Log.d("ssssssssssssss", car.toString());
+                    }
                 }
             }
         }
+
+        @Override
+        public void onFailure(Call<Response<ArrayList<Car>>> call, Throwable throwable) {
+            Log.d("Kiểu này nè", throwable.getMessage());
+        }
+    };
+    Callback<Response<ArrayList<Car>>> searchCars = new Callback<Response<ArrayList<Car>>>() {
+        @Override
+        public void onResponse(Call<Response<ArrayList<Car>>> call, retrofit2.Response<Response<ArrayList<Car>>> response) {
+            if (response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    carList = new ArrayList<>();
+                    carList = response.body().getData();
+
+                    carAdapter.setData(carList);
+                    lvMain.setAdapter(carAdapter);
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<Response<ArrayList<Car>>> call, Throwable throwable) {
+            Log.d("Kiểu này nè", throwable.getMessage());
+        }
+    };
+    Callback<Response<Car>> deleteCar = new Callback<Response<Car>>() {
+        @Override
+        public void onResponse(Call<Response<Car>> call, retrofit2.Response<Response<Car>> response) {
+            if (response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    Toast.makeText(Danh_Sach.this, "Xoá thành công", Toast.LENGTH_SHORT).show();
+                    onResume();
+
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<Response<Car>> call, Throwable throwable) {
+            Log.d("sssssssssssssssssss", throwable.getMessage());
+        }
+    };
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        httpRequest.callApi().getCars().enqueue(getCars);
     }
 
-    // Method to get image path from URI
-    private String getImagePath(Uri uri) {
-        String[] projection = { MediaStore.Images.Media.DATA };
-        Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-        if (cursor != null) {
-            int columnIndex = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-            cursor.moveToFirst();
-            String imagePath = cursor.getString(columnIndex);
-            cursor.close();
-            return imagePath;
+    public void deleteCar(String id) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Danh_Sach.this);
+        builder.setTitle("Xóa Distributor");
+        builder.setMessage("Bạn có muốn xóa?")
+                .setPositiveButton("Có", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        httpRequest.callApi().deleteCarById(id).enqueue(deleteCar);
+                    }
+                })
+                .setNegativeButton("Không", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+        builder.create().show();
+    }
+
+    Callback<Response<Car>> editCar = new Callback<Response<Car>>() {
+        @Override
+        public void onResponse(Call<Response<Car>> call, retrofit2.Response<Response<Car>> response) {
+            if (response.isSuccessful()) {
+                if (response.body().getStatus() == 200) {
+                    Toast.makeText(Danh_Sach.this, "Sửa thành công", Toast.LENGTH_SHORT).show();
+                    onResume();
+
+                }
+            }
+        }
+
+        @Override
+        public void onFailure(Call<Response<Car>> call, Throwable throwable) {
+            Log.d("sssssssssssssssssss", throwable.getMessage());
+        }
+    };
+
+    public void updateCar(String id, String tenXe, int gia, String anh, String loaiXe) {
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(Danh_Sach.this);
+        LayoutInflater inflater = LayoutInflater.from(Danh_Sach.this);
+        View view = inflater.inflate(R.layout.dialog_edit_danhsach, null);
+        builder.setView(view);
+
+        AlertDialog dialog = builder.create();
+        btnUpdate = view.findViewById(R.id.btnUpdate);
+        btnCancel = view.findViewById(R.id.btnCancel);
+        imgEdit = view.findViewById(R.id.imgEdit);
+        imgEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                chooseImage();
+            }
+        });
+        edtTenXe = view.findViewById(R.id.edtTenXe);
+        edtGia = view.findViewById(R.id.edtGia);
+        spinnerLoai = view.findViewById(R.id.spinnerLoai);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(Danh_Sach.this,
+                R.array.loai_xe_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerLoai.setAdapter(adapter);
+        edtTenXe.setText(tenXe);
+        edtGia.setText(String.valueOf(gia));
+        if (loaiXe != null) {
+            int spinnerPosition = adapter.getPosition(loaiXe);
+            spinnerLoai.setSelection(spinnerPosition);
+        }
+        if (anh != null) {
+            imageUri = Uri.parse(anh);
+            Log.d("zzzzzzzzzzzzzzzzzz", "updateCar: " + imageUri.toString());
+            Log.d("ssssssssssssssss", anh);
+            Glide.with(Danh_Sach.this).load(imageUri)
+                    .thumbnail(Glide.with(Danh_Sach.this).load(R.drawable.home))
+                    .skipMemoryCache(false)
+                    .into(imgEdit);
+        }
+        btnUpdate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tenXe = edtTenXe.getText().toString();
+                int gia = Integer.parseInt(edtGia.getText().toString());
+                String loaiXe = spinnerLoai.getSelectedItem().toString();
+                if (tenXe.isEmpty() || gia == 0) {
+                    Toast.makeText(Danh_Sach.this, "Mời không để trống trường dữ liệu", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                if (anh == null) {
+                    Toast.makeText(Danh_Sach.this, "Xin chọn ảnh", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
+                MultipartBody.Part body = MultipartBody.Part.createFormData("anh", file.getName(), requestFile);
+                RequestBody tenXeRequestBody = RequestBody.create(MediaType.parse("text/plain"), tenXe);
+                RequestBody giaRequestBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(gia));
+                RequestBody loaiXeRequestBody = RequestBody.create(MediaType.parse("text/plain"), loaiXe);
+                httpRequest.callApi().updateCarById(id, tenXeRequestBody, giaRequestBody, loaiXeRequestBody, body).enqueue(editCar);
+                dialog.dismiss();
+            }
+        });
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    ActivityResultLauncher<Intent> getImage = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    if (result.getResultCode() == Activity.RESULT_OK) {
+                        Intent data = result.getData();
+                        if (data != null) {
+                            imageUri = data.getData();
+                            file = createFileFromUri(imageUri, "anh");
+                            Glide.with(Danh_Sach.this)
+                                    .load(imageUri)
+                                    .thumbnail(Glide.with(Danh_Sach.this).load(R.drawable.home))
+                                    .skipMemoryCache(false)
+                                    .into(imgEdit);
+                        }
+                    }
+                }
+            });
+
+
+    private File createFileFromUri(Uri path, String name) {
+        File _file = new File(Danh_Sach.this.getCacheDir(), name + ".png");
+        try {
+            InputStream in = Danh_Sach.this.getContentResolver().openInputStream(path);
+            if (in == null) {
+                Log.e("createFileFromUri", "Input stream is null");
+                return null;
+            }
+            OutputStream out = new FileOutputStream(_file);
+            byte[] buf = new byte[1024];
+            int len;
+            while ((len = in.read(buf)) > 0) {
+                out.write(buf, 0, len);
+            }
+            out.close();
+            in.close();
+            Log.d("createFileFromUri", "File created successfully: " + _file.getAbsolutePath());
+            return _file;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.e("createFileFromUri", "File not found: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e("createFileFromUri", "IOException: " + e.getMessage());
         }
         return null;
     }
 
-    // Method to add student to the database
-    private void addStudentToDatabase(Student_DTO student) {
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://10.24.26.93:3027/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+    private void chooseImage() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        getImage.launch(intent);
+    }
 
-        Student_API api = retrofit.create(Student_API.class);
-        Call<Student_DTO> call = api.addStudent(student);
+    private void sortCars(String sortOption) {
+        String sortOrder;
+        if (sortOption.equals("Bot to Top")) {
+            sortOrder = "asc";
+        } else {
+            sortOrder = "desc";
+        }
 
-        call.enqueue(new Callback<Student_DTO>() {
+        httpRequest.callApi().sortCarsByPrice(sortOrder).enqueue(new Callback<Response<ArrayList<Car>>>() {
             @Override
-            public void onResponse(Call<Student_DTO> call, Response<Student_DTO> response) {
+            public void onResponse(Call<Response<ArrayList<Car>>> call, retrofit2.Response<Response<ArrayList<Car>>> response) {
                 if (response.isSuccessful()) {
-                    // Handle successful addition of student
-                    Student_DTO addedStudent = response.body();
-                    Toast.makeText(Danh_Sach.this, "Thêm sinh viên thành công", Toast.LENGTH_SHORT).show();
-                    // Refresh student list or perform other necessary actions
-                    nodchanglist();
+                    if (response.body().getStatus() == 200) {
+                        ArrayList<Car> sortedCars = response.body().getData();
+                        carAdapter.setData(sortedCars);
+                        carAdapter.notifyDataSetChanged();
+                    }
                 } else {
-                    // Handle unsuccessful addition of student
-                    Toast.makeText(Danh_Sach.this, "Thêm sinh viên không thành công", Toast.LENGTH_SHORT).show();
+                    // Handle unsuccessful response
                 }
             }
 
             @Override
-            public void onFailure(Call<Student_DTO> call, Throwable t) {
-                // Handle connection failure or request processing failure
-                Toast.makeText(Danh_Sach.this, "Lỗi: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onFailure(Call<Response<ArrayList<Car>>> call, Throwable throwable) {
+                // Handle failure
             }
         });
     }
 
 }
+//    }
+
+

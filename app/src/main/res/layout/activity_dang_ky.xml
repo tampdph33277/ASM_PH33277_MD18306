@@ -7,20 +7,25 @@
     android:orientation="vertical"
     android:gravity="center"
     tools:context=".Dang_Ky">
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:src="@drawable/ic_launcher_foreground"
 
+        />
     <EditText
         android:id="@+id/editTextUsername1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="100dp"
-        android:hint="Username"
+        android:layout_width="350dp"
+        android:layout_height="60dp"
+            android:hint="Username"
+        android:background="@drawable/custtomedit"
         android:padding="10dp" />
 
     <EditText
         android:id="@+id/editTextPassword1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-
+        android:layout_width="350dp"
+        android:layout_height="60dp"
+android:background="@drawable/custtomedit"
         android:layout_marginTop="20dp"
         android:hint="Password"
         android:inputType="textPassword"
@@ -30,10 +35,11 @@
 
     <Button
         android:id="@+id/buttonRegister1"
-        android:layout_width="match_parent"
+        android:layout_width="350dp"
         android:layout_height="wrap_content"
          android:layout_marginTop="20dp"
         android:text="Đăng ký"
+        android:backgroundTint="#70cbff"
         android:padding="10dp" />
 
 </LinearLayout>

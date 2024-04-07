@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:ignore="HardcodedText"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp"
-    android:layout_margin="5dp"
->
+    android:layout_margin="9dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,9 +19,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_toLeftOf="@id/img_edit_student">
+            android:layout_toLeftOf="@id/btnSua">
             <TextView
-                android:id="@+id/tv_id_student"
+                android:id="@+id/tvTenXe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Mã sách: 1"
@@ -26,7 +30,7 @@
                 android:textColor="@color/black"
                 />
             <TextView
-                android:id="@+id/tv_ten_student"
+                android:id="@+id/tvGiaXe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Tên Loại: CNTT"
@@ -35,7 +39,7 @@
                 android:textColor="@color/black"
                 />
             <TextView
-                android:id="@+id/tv_dtb_student"
+                android:id="@+id/tvLoaiXe"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Nhà Cung Cấp: Kim Đồng"
@@ -44,7 +48,7 @@
                 android:textColor="@color/black"
                 />
             <ImageView
-                android:id="@+id/image_avatar"
+                android:id="@+id/ivAnhXe"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:scaleType="centerCrop"
@@ -53,18 +57,95 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/img_xoa_student"
+            android:id="@+id/btnXoa"
             android:src="@drawable/baseline_delete_forever_24"
             android:layout_centerInParent="true"
             android:layout_alignParentRight="true"
             android:padding="10dp"/>
+
         <ImageView
+            android:id="@+id/btnSua"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/img_edit_student"
-            android:src="@drawable/baseline_edit_24"
             android:layout_centerInParent="true"
-            android:layout_toLeftOf="@id/img_xoa_student"
-            android:padding="10dp"/>
+            android:layout_toLeftOf="@id/btnXoa"
+            android:padding="10dp"
+            android:src="@drawable/baseline_edit_24" />
     </RelativeLayout>
-</LinearLayout>
+<!--    <RelativeLayout-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:padding="12dp">-->
+<!--        <LinearLayout-->
+<!--            android:id="@+id/txtContent"-->
+<!--            android:layout_width="190dp"-->
+<!--            android:layout_height="168dp"-->
+<!--            android:orientation="vertical">-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/tvTenXe"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textSize="16sp"-->
+<!--                android:layout_margin="12dp"-->
+<!--                android:text="Tên Xe" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/tvGiaXe"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textSize="16sp"-->
+<!--                android:layout_margin="12dp"-->
+<!--                android:text="Giá Xe" />-->
+
+<!--            <TextView-->
+<!--                android:id="@+id/tvLoaiXe"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:textSize="16sp"-->
+<!--                android:layout_margin="12dp"-->
+<!--                android:text="Loại Xe" />-->
+
+<!--        </LinearLayout>-->
+<!--        <LinearLayout-->
+<!--            android:layout_width="180dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_toEndOf="@id/txtContent"-->
+<!--            android:orientation="vertical"-->
+<!--            android:gravity="center_vertical">-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/ivAnhXe"-->
+<!--                android:layout_width="178dp"-->
+<!--                android:layout_height="120dp"-->
+<!--                android:contentDescription="Anh"-->
+<!--                android:src="@drawable/default_car_image"-->
+<!--                android:background="@drawable/rounded_corner"    -->
+<!--                android:clipToOutline="true"-->
+<!--                tools:targetApi="s" />-->
+<!--            <LinearLayout-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:orientation="horizontal"-->
+<!--                android:layout_marginStart="60dp">-->
+<!--                <ImageButton-->
+<!--                    android:id="@+id/btnXoa"-->
+<!--                    android:layout_width="48dp"-->
+<!--                    android:layout_height="48dp"-->
+<!--                    android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--                    android:src="@drawable/trash_24"-->
+<!--                    android:layout_marginEnd="20dp"-->
+<!--                    android:contentDescription="Xóa" />-->
+<!--                <ImageButton-->
+<!--                    android:id="@+id/btnSua"-->
+<!--                    android:layout_width="48dp"-->
+<!--                    android:layout_height="48dp"-->
+<!--                    android:background="?attr/selectableItemBackgroundBorderless"-->
+<!--                    android:src="@drawable/pencil_24"-->
+<!--                    android:contentDescription="Sửa" />-->
+
+<!--            </LinearLayout>-->
+<!--        </LinearLayout>-->
+<!--    </RelativeLayout>-->
+
+</androidx.cardview.widget.CardView>

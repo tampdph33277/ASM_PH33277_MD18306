@@ -8,7 +8,12 @@
     android:orientation="vertical"
     android:padding="15dp"
     >
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:src="@drawable/ic_launcher_foreground"
 
+        />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -27,7 +32,7 @@
         android:id="@+id/btngetotp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/custtombutton"
+      android:backgroundTint="#00BCD4"
         android:text="Get OTP"
         android:layout_marginTop="30dp"
         />
@@ -48,8 +53,9 @@
         android:id="@+id/btnloginotp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/custtombutton"
+
         android:text="Login"
+        android:backgroundTint="#03A9F4"
         android:layout_marginTop="30dp"
         />
 

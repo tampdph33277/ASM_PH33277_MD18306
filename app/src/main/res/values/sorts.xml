@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sap_xep_array">
+        <item>Cao to Thấp</item>
+        <item>Thấp to Cao</item>
+    </string-array>
+</resources>

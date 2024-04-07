@@ -60,10 +60,10 @@ buttonRegister.setOnClickListener(new View.OnClickListener() {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "createUserWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Intent in = new Intent(Dang_Ky.this,Dang_Nhap_GMAIL.class);
-                            in.putExtra("email",email);
-                            in.putExtra("password",password);
-                            startActivity(in);
+                           Intent in = new Intent(Dang_Ky.this,Dang_Nhap_GMAIL.class);
+//                            in.putExtra("email",email);
+//                            in.putExtra("password",password);
+                           startActivity(in);
                             Toast.makeText(Dang_Ky.this, "Đăng Kí Thành Công!",
                                     Toast.LENGTH_SHORT).show();
 
